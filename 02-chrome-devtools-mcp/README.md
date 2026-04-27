@@ -4,24 +4,35 @@
 
 **The fix:** Install the Chrome DevTools MCP server. It connects Claude Code to your real Chrome browser via the accessibility tree, inheriting your logged-in sessions. Claude can then click, type, fill forms, read pages, take screenshots, all inside your actual browser.
 
+## One manual step you have to do first
+
+Claude can't enable Chrome's remote debugging for you (chicken-and-egg: the MCP needs it on to connect, and Claude needs the MCP to do anything in Chrome). So before you paste the install prompt, do this:
+
+1. Open Chrome
+2. Go to `chrome://inspect/#remote-debugging`
+3. Make sure remote debugging is enabled (you should see a "Configure" button and a target list, not a "Discover" toggle that's off)
+
+Then paste the install prompt below.
+
 ## Install
 
-Paste this prompt into Claude Code. It will install the MCP, append a usage rule to your CLAUDE.md, and walk you through the one manual step (enabling Chrome's remote debugging).
+Paste this into Claude Code. It will install the MCP, append the usage rule to your CLAUDE.md, and tell you when to restart.
 
 ````
 Install the Chrome DevTools MCP patch from github.com/0xLoqi/claude-code-patches/02-chrome-devtools-mcp.
 
-Steps:
-1. Detect my OS (run `uname` or check `process.platform`).
-2. Run the appropriate install command for my OS:
+Confirm with me first: have I enabled Chrome remote debugging at chrome://inspect/#remote-debugging? If I haven't, stop and tell me exactly what to do, then wait for me to reply "ready" before continuing. You cannot enable this for me.
+
+Once I confirm I'm ready:
+
+1. Detect my OS (uname or process.platform).
+2. Run the appropriate install command:
    - Windows: claude mcp add chrome-devtools -- cmd /c npx -y chrome-devtools-mcp@latest --autoConnect
    - macOS/Linux: claude mcp add chrome-devtools -- npx -y chrome-devtools-mcp@latest --autoConnect
 3. Confirm the install succeeded by running `claude mcp list` and showing me the chrome-devtools entry.
 4. Append the usage rule below to my ~/.claude/CLAUDE.md (create file if needed, blank line separator from existing content).
-5. Tell me clearly that I need to do TWO manual things before this works:
-   a. Open chrome://inspect/#remote-debugging in Chrome and enable it
-   b. Restart this Claude Code session so the MCP loads
-6. After my next session, the MCP exposes ~25 tools with the prefix mcp__chrome-devtools__*. From that point forward, any browser task I ask for, USE the MCP instead of generating scripts.
+5. Tell me to restart this Claude Code session so the MCP loads. Once restarted, ~25 tools with the prefix mcp__chrome-devtools__* will be available.
+6. From the next session forward, when I ask for any browser-based task, USE the MCP instead of generating scripts.
 
 Rule to append exactly as written, including the heading:
 
@@ -54,6 +65,12 @@ Claude can now:
 - Take screenshots for verification
 - Drive multi-step workflows end-to-end
 
+## Tips for actual use
+
+**Opus handles tricky navigation noticeably better than Sonnet.** Both models can drive the MCP, but Opus is more resilient on edge cases: weird popups, multi-frame layouts, redirects, dialogs that hijack focus, "spinning wheel" loading states. Sonnet tends to retry the same failed action; Opus pivots. If you have access to Opus, use it for serious browser automation tasks. Sonnet is fine for short scripted flows.
+
+**Re-snapshot after every action.** The number one cause of "stuck" automation runs is acting on a stale page snapshot. The Patch 02 rule bakes this in, but it's worth knowing.
+
 ## Security note
 
-The MCP inherits your Chrome session. Claude can see every site you're logged into and act as you. Same caution as any browser automation with your credentials. Don't point it at high-stakes production accounts without review. Chrome's sandbox still applies and Claude Code's permission prompts still fire per tool call unless you explicitly allow them.
+The MCP inherits your Chrome session. Claude can see every site you're logged into and act as you. Same caution as any browser automation with your credentials: don't point it at high-stakes production accounts without review. Chrome's sandbox still applies and Claude Code's permission prompts still fire per tool call unless you explicitly allow them.

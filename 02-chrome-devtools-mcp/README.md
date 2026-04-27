@@ -1,62 +1,59 @@
 # Patch 02: Chrome DevTools MCP
 
-**What's broken out of the box:** Claude Code can't actually drive your browser. When you ask it to fill out a form, click through a portal, or test a signup flow in a real web app, it gives you a `curl` command, a Playwright script, or step-by-step instructions you have to execute yourself.
+**What's broken out of the box:** Claude Code can't actually drive your browser. When you ask it to fill out a form, click through a portal, or test a signup flow in a real web app, it gives you a `curl` command, a Playwright script, or step-by-step instructions you have to execute yourself. You didn't want a script. You wanted the form filled out.
 
-You didn't want a script. You wanted the form filled out.
-
-**The fix:** Chrome DevTools MCP. A Model Context Protocol server that connects Claude Code to your real Chrome browser via the accessibility tree. Claude can now click, type, fill forms, read pages, take screenshots, and check network requests — all inside your actual browser session, with your actual logins.
+**The fix:** Install the Chrome DevTools MCP server. It connects Claude Code to your real Chrome browser via the accessibility tree, inheriting your logged-in sessions. Claude can then click, type, fill forms, read pages, take screenshots, all inside your actual browser.
 
 ## Install
 
-### 1. Add the MCP server to Claude Code
+Paste this prompt into Claude Code. It will install the MCP, append a usage rule to your CLAUDE.md, and walk you through the one manual step (enabling Chrome's remote debugging).
 
-**Windows:**
-```bash
-claude mcp add chrome-devtools -- cmd /c npx -y chrome-devtools-mcp@latest --autoConnect
-```
+````
+Install the Chrome DevTools MCP patch from github.com/0xLoqi/claude-code-patches/02-chrome-devtools-mcp.
 
-**macOS / Linux:**
-```bash
-claude mcp add chrome-devtools -- npx -y chrome-devtools-mcp@latest --autoConnect
-```
+Steps:
+1. Detect my OS (run `uname` or check `process.platform`).
+2. Run the appropriate install command for my OS:
+   - Windows: claude mcp add chrome-devtools -- cmd /c npx -y chrome-devtools-mcp@latest --autoConnect
+   - macOS/Linux: claude mcp add chrome-devtools -- npx -y chrome-devtools-mcp@latest --autoConnect
+3. Confirm the install succeeded by running `claude mcp list` and showing me the chrome-devtools entry.
+4. Append the usage rule below to my ~/.claude/CLAUDE.md (create file if needed, blank line separator from existing content).
+5. Tell me clearly that I need to do TWO manual things before this works:
+   a. Open chrome://inspect/#remote-debugging in Chrome and enable it
+   b. Restart this Claude Code session so the MCP loads
+6. After my next session, the MCP exposes ~25 tools with the prefix mcp__chrome-devtools__*. From that point forward, any browser task I ask for, USE the MCP instead of generating scripts.
 
-### 2. Enable Chrome remote debugging
+Rule to append exactly as written, including the heading:
 
-Open Chrome and go to:
-```
-chrome://inspect/#remote-debugging
-```
+---
 
-The `--autoConnect` flag lets the MCP connect to your already-running Chrome session, which means it inherits all your logged-in cookies and sessions. This is how Claude gets to act as you on the services you're already authenticated to.
+## Chrome DevTools MCP (Patch 02)
 
-### 3. Restart Claude Code
+When the user asks for anything browser-based (filling forms, clicking through portals, testing UI, scraping a logged-in site, automating SaaS workflows), use the chrome-devtools MCP tools (mcp__chrome-devtools__*) instead of generating curl commands or Playwright scripts. The MCP runs with --autoConnect so it shares the user's real Chrome session and logins.
 
-Start a new session. Claude should now have access to ~25 new tools with the `mcp__chrome-devtools__` prefix.
+**Performance rules baked in:**
+- After navigate_page, default to take_snapshot not wait_for. wait_for blocks 15-25s when the guessed text isn't on the page; take_snapshot returns the actual a11y tree immediately.
+- Batch sequential same-page actions into one evaluate_script call when possible (74% fewer tool calls).
+- Never retry a failed action without re-snapshotting first. The page state has changed.
+- For long flows (>10 steps), pin a 3-7 step high-level plan in context to prevent drift, but still react to actual page state each step.
+
+**Self-announce:** The first time per session I reach for a browser-related task with the MCP, prepend "[Chrome DevTools]" so the user can see the patch working. Once per session only.
+````
 
 ## What changes
 
-Before:
-> Here's a Playwright script that will fill out the form. Save it as `fill-form.js` and run `node fill-form.js`.
+Before: "Here's a Playwright script that will fill out the form. Save it as `fill-form.js` and run `node fill-form.js`."
 
-After:
-> Filled out the form on your Stripe dashboard. Subscription created, confirmation number CSX-4412. Screenshot attached.
+After: "[Chrome DevTools] Filled out the form on your Stripe dashboard. Subscription created, confirmation number CSX-4412. Screenshot attached."
 
 Claude can now:
-- Navigate to any URL in your browser
-- Fill forms and click buttons on a real page
-- Read full page content via the accessibility tree (no screenshot parsing)
+- Navigate any URL in your browser
+- Fill forms and click buttons on real pages
+- Read full page content via the accessibility tree
 - Check network requests and console errors
 - Take screenshots for verification
 - Drive multi-step workflows end-to-end
 
-## Performance tips
-
-- **Snapshot first, don't wait.** After `navigate_page`, call `take_snapshot` to get the real DOM instead of `wait_for` blocking on text you guessed might be there.
-- **Batch actions.** Sequential actions on the same page (e.g., fill 5 fields) can often be combined into one `evaluate_script` call instead of 5 separate tool calls.
-- **Never retry without re-snapshotting.** If an action fails, the page state has changed. Snapshot again before retrying.
-
 ## Security note
 
-The MCP inherits your Chrome session. That means Claude can see every site you're logged into and take actions as you. Use with the same caution you'd use any automation tool that has your credentials — don't point it at high-stakes production accounts without review.
-
-Chrome's sandbox still applies, and Claude Code's permission prompts still fire for each tool call unless you explicitly allow them.
+The MCP inherits your Chrome session. Claude can see every site you're logged into and act as you. Same caution as any browser automation with your credentials. Don't point it at high-stakes production accounts without review. Chrome's sandbox still applies and Claude Code's permission prompts still fire per tool call unless you explicitly allow them.

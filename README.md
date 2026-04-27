@@ -2,32 +2,40 @@
 
 **Out of the box, Claude Code doesn't know what it can do.**
 
-It defaults to advisor mode: tells you the steps, gives you prompts, drafts test plans. You wanted it to *do the thing*.
+It defaults to advisor mode: outlines steps, gives you prompts, drafts plans for you to execute. You wanted it to *do the thing*.
 
-This repo is the collection of patches that flip Claude Code from advisor mode into doer mode. Each one is a fix for a specific failure mode I caught while actually using Claude Code to ship real products. Copy-paste into your own setup, feel the difference in your first session.
+This repo is a library of patches that flip Claude from advisor mode into doer mode. Each patch is a single prompt you paste into Claude Code. Claude installs the patch on your machine, appends rules to your `CLAUDE.md`, and self-announces when the patch fires so you can watch it work.
+
+No install instructions. No "open this file, edit that line, restart this thing." You paste the prompt, Claude does the rest.
+
+---
+
+## How It Works
+
+Each patch in this repo has a `README.md` with:
+
+1. **The failure mode** out of the box (what Claude does wrong)
+2. **The install prompt** — one block, copy it, paste it into Claude Code, done
+3. **What changes** — before/after examples of how Claude behaves once installed
+
+Behind the scenes, the install prompt tells Claude to:
+- Run any required install commands (MCP servers, dependencies)
+- Append the patch's rule to your `~/.claude/CLAUDE.md`
+- Verify the install worked
+- **Self-announce** the first time the patch fires in a session, prepending a tag like `[Doer Mode]` or `[Chrome DevTools]` so you can see the patch in action
+
+The self-announce makes the patches *teachable* — you watch Claude reach for them in the wild and learn when each one applies.
 
 ---
 
 ## The Patches
 
-| # | Patch | What it fixes | Install time |
-|---|-------|---------------|--------------|
-| 01 | [Take Ownership](./01-take-ownership/) | Claude outlines steps instead of doing the work | 30 seconds |
-| 02 | [Chrome DevTools MCP](./02-chrome-devtools-mcp/) | Claude can't actually drive your browser | 5 minutes |
+| # | Patch | What it fixes |
+|---|-------|---------------|
+| 01 | [Doer Mode](./01-take-ownership/) | Claude outlines steps instead of doing the work |
+| 02 | [Chrome DevTools MCP](./02-chrome-devtools-mcp/) | Claude can't drive your browser |
 
 More patches dropping weekly. Star the repo to get notified.
-
----
-
-## How to Use
-
-Each patch lives in its own folder with a README explaining:
-- The failure mode out of the box
-- The fix
-- How to install it
-- What changes in your day-to-day
-
-Patches marked with `CLAUDE.md` have a snippet you paste into your own `CLAUDE.md` file (global at `~/.claude/CLAUDE.md` or project-level in the repo root). MCP patches have install commands. Hook patches have `settings.json` config.
 
 ---
 
@@ -41,9 +49,9 @@ The gap between advisor mode and doer mode is the biggest unlock in the product.
 
 ## What's Coming
 
-- More patches from my actual setup (memory system, hooks, skills, MCP config)
-- A hands-on setup walkthrough for people who want the full system dropped in, configured, and explained end-to-end ([email me](mailto:elijah.wbanks@gmail.com) if interested — limited spots)
-- A Discord or Telegram for people running the patches to share what they're building
+- More patches mined from real power use (memory rules, hooks, MCP servers, skills, behavior corrections)
+- A hands-on setup walkthrough for people who want the full system installed and explained end-to-end ([email me](mailto:elijah.wbanks@gmail.com) if interested, limited spots)
+- A Discord or Telegram for people running the patches to share what they're shipping with them
 
 ---
 

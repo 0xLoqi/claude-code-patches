@@ -34,6 +34,7 @@ The self-announce makes the patches *teachable* — you watch Claude reach for t
 |---|-------|---------------|
 | 01 | [Doer Mode](./01-take-ownership/) | Claude outlines steps instead of doing the work |
 | 02 | [Chrome DevTools MCP](./02-chrome-devtools-mcp/) | Claude can't drive your browser |
+| 03 | [Blocker Review](./03-blocker-review/) | Friction repeats across sessions because nothing reads your session logs |
 
 More patches dropping weekly. Star the repo to get notified.
 

@@ -51,7 +51,7 @@ Top Blockers:
 Quick Wins:
 1. Update CLAUDE.md rtk section: enumerate which commands rtk handles
 2. Add CLAUDE.md line: stale .git/index.lock → diagnose, don't retry
-3. Investigate stale sync_workspace.py hook reference
+3. Investigate stale hook reference left over from a workspace migration
 
 Apply? Pick numbers or say "all".
 ```

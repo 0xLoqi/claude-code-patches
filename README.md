@@ -36,6 +36,7 @@ The self-announce makes the patches *teachable* — you watch Claude reach for t
 | 02 | [Chrome DevTools MCP](./02-chrome-devtools-mcp/) | Claude can't drive your browser |
 | 03 | [Blocker Review](./03-blocker-review/) | Friction repeats across sessions because nothing reads your session logs |
 | 04 | [Stress-Test First](./04-stress-test/) | Claude agrees with you, then defends the agreement when you push back |
+| 05 | [Config Canary](./05-config-canary/) | Your hooks silently stop existing and nothing tells you |
 
 More patches dropping weekly. Star the repo to get notified.
 

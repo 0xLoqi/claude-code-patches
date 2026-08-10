@@ -37,6 +37,7 @@ The self-announce makes the patches *teachable* — you watch Claude reach for t
 | 03 | [Blocker Review](./03-blocker-review/) | Friction repeats across sessions because nothing reads your session logs |
 | 04 | [Stress-Test First](./04-stress-test/) | Claude agrees with you, then defends the agreement when you push back |
 | 05 | [Config Canary](./05-config-canary/) | Your hooks silently stop existing and nothing tells you |
+| 06 | [WebFetch Fidelity](./06-webfetch-fidelity/) | WebFetch feeds Claude a summary of a page, not the source, and the loss is invisible |
 
 More patches dropping weekly. Star the repo to get notified.
 
